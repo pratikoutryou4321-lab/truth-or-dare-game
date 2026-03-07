@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Adventure Awaits Spinner</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="assets/icon.png" />
+  <link rel="stylesheet" href="css/style.css?v=20260312" />
+</head>
+<body data-theme="classic">
+  <div class="bg-glow"></div>
+  <main class="app">
+    <header class="header">
+      <h1>Adventure Awaits Spinner</h1>
+      <p>Spin the neon wheel. Accept your fate.</p>
+    </header>
+
+    <section class="card players-card">
+      <h2>Players</h2>
+      <form id="player-form" class="player-form">
+        <input id="player-input" type="text" maxlength="280" placeholder="Add player name or paste comma-separated names" autocomplete="off" />
+        <button type="submit" class="btn primary">Add</button>
+      </form>
+      <p id="player-feedback" class="player-feedback" aria-live="polite"></p>
+      <ul id="players-list" class="players-list"></ul>
+    </section>
+
+    <section class="card wheel-card">
+      <div class="wheel-wrap">
+        <div class="wheel-shadow" aria-hidden="true"></div>
+        <div class="wheel-frame" aria-hidden="true">
+          <div class="frame-ring outer"></div>
+          <div class="frame-ring inner"></div>
+        </div>
+        <div class="pointer" aria-hidden="true"></div>
+        <canvas id="wheel" width="420" height="420" aria-label="Player wheel"></canvas>
+        <div class="wheel-glass" aria-hidden="true"></div>
+        <button id="spin-btn" class="hub-btn" type="button">SPIN</button>
+        <div class="sparkles" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="controls">
+        <button id="music-btn" class="btn" type="button">Music: Off</button>
+      </div>
+    </section>
+
+    <section id="result" class="card result-card hidden" aria-live="polite">
+      <h2>Result</h2>
+      <p id="result-player" class="result-player"></p>
+      <p id="result-mode" class="result-mode"></p>
+      <p id="result-text" class="result-text"></p>
+    </section>
+  </main>
+
+  <audio id="spin-sound" src="assets/spin.mp3" preload="auto"></audio>
+  <audio id="win-sound" src="assets/win.mp3" preload="auto"></audio>
+  <audio id="bg-music" src="assets/bg-music.mp3" preload="auto" loop></audio>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script type="module" src="js/game.js?v=20260312"></script>
+</body>
+</html>
