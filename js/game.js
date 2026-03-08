@@ -1,5 +1,5 @@
-import { createPlayerManager } from "./players.js";
-import { createWheel } from "./wheel.js";
+import { createPlayerManager } from "./players.js?v=20260320";
+import { createWheel } from "./wheel.js?v=20260320";
 
 const form = document.getElementById("player-form");
 const input = document.getElementById("player-input");
@@ -18,6 +18,7 @@ const resultText = document.getElementById("result-text");
 
 const spinSound = document.getElementById("spin-sound");
 const winSound = document.getElementById("win-sound");
+const fahSound = document.getElementById("fah-sound");
 const bgMusic = document.getElementById("bg-music");
 
 let tickAudioContext = null;
@@ -114,6 +115,7 @@ function showResult(player) {
   resultCard.classList.remove("hidden");
 
   safePlay(winSound, true);
+  safePlay(fahSound, true);
 
   if (typeof confetti === "function") {
     const defaults = {

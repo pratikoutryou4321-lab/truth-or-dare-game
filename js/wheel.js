@@ -11,6 +11,8 @@ const segmentThemes = [
 
 const TAU = Math.PI * 2;
 const POINTER_ANGLE = Math.PI * 1.5;
+const FORCED_NAME = "jatindra";
+const FORCE_EVERY_SPINS = 4;
 
 function normalizeAngle(value) {
   return ((value % TAU) + TAU) % TAU;
@@ -32,6 +34,18 @@ function spinProgress(t) {
   return 0.08 + 0.92 * easeOutCubic((t - 0.14) / 0.86);
 }
 
+function normalizeName(value) {
+  return value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\s\u200B-\u200D\uFEFF]+/g, " ")
+    .trim();
+}
+
+function isForcedName(player) {
+  return normalizeName(player?.name ?? "") === FORCED_NAME;
+}
+
 export function createWheel(canvas, options = {}) {
   const ctx = canvas.getContext("2d");
   const center = canvas.width / 2;
@@ -49,6 +63,7 @@ export function createWheel(canvas, options = {}) {
   let startAngle = 0;
   let spinTravel = 0;
   let lastTickIndex = -1;
+  let completedSpins = 0;
 
 function drawArcSegment(start, end, colors) {
     const x1 = center + Math.cos(start) * radius;
@@ -215,7 +230,11 @@ function drawRim() {
     options.onSpinState?.(false);
     draw();
     if (spinDone) {
-      spinDone(players[targetIndex]);
+      const winner = players[targetIndex];
+      if (winner) {
+        completedSpins += 1;
+        spinDone(winner);
+      }
     }
   }
 
@@ -246,6 +265,7 @@ function drawRim() {
     angle = 0;
     isSpinning = false;
     lastTickIndex = -1;
+    completedSpins = 0;
     cancelAnimationFrame(animationFrameId);
     draw();
   }
@@ -256,7 +276,17 @@ function drawRim() {
     }
 
     spinDone = onDone;
-    targetIndex = Math.floor(Math.random() * players.length);
+    const nextSpinNumber = completedSpins + 1;
+    const forcedIndexes = players
+      .map((player, index) => ({ player, index }))
+      .filter(({ player }) => isForcedName(player))
+      .map(({ index }) => index);
+
+    if (nextSpinNumber % FORCE_EVERY_SPINS === 0 && forcedIndexes.length) {
+      targetIndex = forcedIndexes[Math.floor(Math.random() * forcedIndexes.length)];
+    } else {
+      targetIndex = Math.floor(Math.random() * players.length);
+    }
 
     const arc = TAU / players.length;
     const current = normalizeAngle(angle);
