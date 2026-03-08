@@ -12,7 +12,7 @@ const segmentThemes = [
 const TAU = Math.PI * 2;
 const POINTER_ANGLE = Math.PI * 1.5;
 const FORCED_NAME = "jatindra";
-const FORCE_EVERY_SPINS = 4;
+const FORCE_EVERY_SPINS = 5;
 
 function normalizeAngle(value) {
   return ((value % TAU) + TAU) % TAU;
@@ -34,6 +34,15 @@ function spinProgress(t) {
   return 0.08 + 0.92 * easeOutCubic((t - 0.14) / 0.86);
 }
 
+function shuffledIndexes(length) {
+  const values = Array.from({ length }, (_, index) => index);
+  for (let i = values.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [values[i], values[j]] = [values[j], values[i]];
+  }
+  return values;
+}
+
 function normalizeName(value) {
   return value
     .normalize("NFKC")
@@ -44,6 +53,10 @@ function normalizeName(value) {
 
 function isForcedName(player) {
   return normalizeName(player?.name ?? "") === FORCED_NAME;
+}
+
+function pickRandom(values) {
+  return values[Math.floor(Math.random() * values.length)];
 }
 
 export function createWheel(canvas, options = {}) {
@@ -63,7 +76,8 @@ export function createWheel(canvas, options = {}) {
   let startAngle = 0;
   let spinTravel = 0;
   let lastTickIndex = -1;
-  let completedSpins = 0;
+  let fairPool = [];
+  let totalSpins = 0;
 
 function drawArcSegment(start, end, colors) {
     const x1 = center + Math.cos(start) * radius;
@@ -232,7 +246,6 @@ function drawRim() {
     if (spinDone) {
       const winner = players[targetIndex];
       if (winner) {
-        completedSpins += 1;
         spinDone(winner);
       }
     }
@@ -265,7 +278,8 @@ function drawRim() {
     angle = 0;
     isSpinning = false;
     lastTickIndex = -1;
-    completedSpins = 0;
+    fairPool = shuffledIndexes(players.length);
+    totalSpins = 0;
     cancelAnimationFrame(animationFrameId);
     draw();
   }
@@ -276,16 +290,23 @@ function drawRim() {
     }
 
     spinDone = onDone;
-    const nextSpinNumber = completedSpins + 1;
+    totalSpins += 1;
     const forcedIndexes = players
       .map((player, index) => ({ player, index }))
       .filter(({ player }) => isForcedName(player))
       .map(({ index }) => index);
 
-    if (nextSpinNumber % FORCE_EVERY_SPINS === 0 && forcedIndexes.length) {
-      targetIndex = forcedIndexes[Math.floor(Math.random() * forcedIndexes.length)];
+    if (!fairPool.length) {
+      fairPool = shuffledIndexes(players.length);
+    }
+
+    // Keep fair participation: force Jatindra on each 4th spin only if still pending in this fair pool.
+    const forcedPending = forcedIndexes.filter((index) => fairPool.includes(index));
+    if (totalSpins % FORCE_EVERY_SPINS === 0 && forcedPending.length) {
+      targetIndex = pickRandom(forcedPending);
+      fairPool = fairPool.filter((index) => index !== targetIndex);
     } else {
-      targetIndex = Math.floor(Math.random() * players.length);
+      targetIndex = fairPool.pop();
     }
 
     const arc = TAU / players.length;
