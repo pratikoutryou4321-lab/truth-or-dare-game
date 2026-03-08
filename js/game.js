@@ -19,6 +19,7 @@ const resultText = document.getElementById("result-text");
 const spinSound = document.getElementById("spin-sound");
 const winSound = document.getElementById("win-sound");
 const fahSound = document.getElementById("fah-sound");
+const faa2Sound = document.getElementById("faa2-sound");
 const bgMusic = document.getElementById("bg-music");
 
 let tickAudioContext = null;
@@ -115,7 +116,8 @@ function showResult(player) {
   resultCard.classList.remove("hidden");
 
   safePlay(winSound, true);
-  safePlay(fahSound, true);
+  const modeSound = mode === "Dare" ? faa2Sound : fahSound;
+  safePlay(modeSound, true);
 
   if (typeof confetti === "function") {
     const defaults = {
